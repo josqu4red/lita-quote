@@ -20,7 +20,7 @@ module Lita
         message = "##{quote_id}: #{response.matches.flatten.first}"
         message += " #{Time.now.strftime(Lita.config.handlers.quote.date_format)}" if Lita.config.handlers.quote.date_format
         redis.hset("list", quote_id, message)
-        response.reply("added quote ##{quote_id}")
+        response.reply("Added quote ##{quote_id}")
       end
 
       def get_quote(response)
