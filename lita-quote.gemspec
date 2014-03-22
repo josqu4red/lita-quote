@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-quote"
-  spec.version       = "0.0.1"
+  spec.version       = "0.0.2"
   spec.authors       = ["Jonathan Amiez"]
   spec.email         = ["jonathan.amiez@gmail.com"]
   spec.description   = "Quote handler for Lita"
