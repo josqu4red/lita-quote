@@ -28,7 +28,7 @@ module Lita
           quote = redis.hget("list", quote_id.to_i)
         else
           quotes = redis.hvals("list")
-          quote = quotes[rand(quotes.length)]
+          quote = quotes.sample
         end
 
         if quote
