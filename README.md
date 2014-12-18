@@ -1,5 +1,8 @@
 # lita-quote
 
+[![Build Status](https://travis-ci.org/josqu4red/lita-quote.png?branch=master)](https://travis-ci.org/josqu4red/lita-quote)
+[![Coverage Status](https://coveralls.io/repos/josqu4red/lita-quote/badge.png)](https://coveralls.io/r/josqu4red/lita-quote)
+
 **lita-quote** is a handler for [Lita](https://github.com/jimmycuadra/lita) to store and retrieve user quotes.
 
 ## Installation
@@ -28,25 +31,25 @@ end
 
 Store a quote:
 ```
-Lita: qadd content of the quote
+Lita: qadd content of the quote # or addquote
 Added quote #42
 ```
 
 Get a random quote:
 ```
-Lita: qget
+Lita: qget # or getquote
 #36: a random quote [2014-03-21]
 ```
 
 Get a given quote:
 ```
-Lita: qget 42
+Lita: qget 42 # or getquote
 #42: content of the quote [2014-03-22]
 ```
 
 Delete a quote:
 ```
-Lita: qdel 42
+Lita: qdel 42 # or delquote
 Deleted quote #42
 ```
 
