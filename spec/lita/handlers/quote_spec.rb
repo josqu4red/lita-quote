@@ -8,18 +8,18 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
   end
 
-  it { routes_command("qadd dat funny guy").to(:add_quote) }
-  it { doesnt_route("qadd").to(:add_quote) }
-  it { doesnt_route("yo qadd dat funny guy").to(:add_quote) }
+  it { is_expected.to route_command("qadd dat funny guy").to(:add_quote) }
+  it { is_expected.not_to route_command("qadd").to(:add_quote) }
+  it { is_expected.not_to route_command("yo qadd dat funny guy").to(:add_quote) }
 
-  it { routes_command("qget").to(:get_quote) }
-  it { routes_command("qget 22").to(:get_quote) }
-  it { doesnt_route("yo qget").to(:get_quote) }
-  it { doesnt_route("qget dat").to(:get_quote) }
+  it { is_expected.to route_command("qget").to(:get_quote) }
+  it { is_expected.to route_command("qget 22").to(:get_quote) }
+  it { is_expected.not_to route_command("yo qget").to(:get_quote) }
+  it { is_expected.not_to route_command("qget dat").to(:get_quote) }
 
-  it { routes_command("qdel 22").to(:del_quote) }
-  it { doesnt_route("qdel").to(:del_quote) }
-  it { doesnt_route("yo qdel dat").to(:del_quote) }
+  it { is_expected.to route_command("qdel 22").with_authorization_for(:admins).to(:del_quote) }
+  it { is_expected.not_to route_command("qdel").to(:del_quote) }
+  it { is_expected.not_to route_command("yo qdel dat").to(:del_quote) }
 
   describe "#add_quote" do
   end

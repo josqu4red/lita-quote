@@ -2,9 +2,7 @@ module Lita
   module Handlers
     class Quote < Handler
 
-      def self.default_config(config)
-        config.date_format = nil
-      end
+      config :date_format
 
       route /^qadd\s+(.*)$/, :add_quote, command: true,
         help: { "qadd <text>" => "Store quote following the command" }
@@ -18,7 +16,7 @@ module Lita
       def add_quote(response)
         quote_id = redis.incr("last_id")
         message = "##{quote_id}: #{response.matches.flatten.first}"
-        message += " #{Time.now.strftime(Lita.config.handlers.quote.date_format)}" if Lita.config.handlers.quote.date_format
+        message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
         redis.hset("list", quote_id, message)
         response.reply("Added quote ##{quote_id}")
       end
