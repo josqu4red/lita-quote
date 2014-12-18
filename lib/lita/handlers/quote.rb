@@ -7,11 +7,8 @@ module Lita
       route /^qadd\s+(.*)$/, :add_quote, command: true,
         help: { "qadd <text>" => "Store quote following the command" }
 
-      route /^qget(\s*(\d+))?$/, :get_quote, command: true,
-        help: { "qget [id]" => "Retrieve a quote by #id or randomly" }
-
-      route /^qdel\s+(\d+)$/, :del_quote, command: true, restrict_to: ["admins"],
-        help: { "qdel <id>" => "Delete quote with given #id (admins only)" }
+      route /^addquote\s+(.*)$/, :add_quote, command: true,
+        help: { "addquote <text>" => "Store quote following the command" }
 
       def add_quote(response)
         quote_id = redis.incr("last_id")
@@ -20,6 +17,12 @@ module Lita
         redis.hset("list", quote_id, message)
         response.reply("Added quote ##{quote_id}")
       end
+
+      route /^qget(\s*(\d+))?$/, :get_quote, command: true,
+        help: { "qget [id]" => "Retrieve a quote by #id or randomly" }
+
+      route /^getquote(\s*(\d+))?$/, :get_quote, command: true,
+        help: { "getquote [id]" => "Retrieve a quote by #id or randomly" }
 
       def get_quote(response)
         if quote_id = response.matches.flatten.last
@@ -35,6 +38,12 @@ module Lita
           response.reply("No quote found")
         end
       end
+
+      route /^qdel\s+(\d+)$/, :del_quote, command: true, restrict_to: ["quote_admins"],
+        help: { "qdel <id>" => "Delete quote with given #id (quote_admins only)" }
+
+      route /^delquote\s+(\d+)$/, :del_quote, command: true, restrict_to: ["quote_admins"],
+        help: { "delquote <id>" => "Delete quote with given #id (quote_admins only)" }
 
       def del_quote(response)
         quote_id = response.matches.flatten.last.to_i
