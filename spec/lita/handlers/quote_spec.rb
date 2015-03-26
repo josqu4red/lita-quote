@@ -1,3 +1,4 @@
+# coding: utf-8
 require "spec_helper"
 
 describe Lita::Handlers::Quote, lita_handler: true do
@@ -32,7 +33,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
   it { is_expected.not_to route_command("yo delquote dat").to(:del_quote) }
 
   describe "#add_quote" do
-    it "adds a quote to database" do
+    it "reports it added a quote" do
       send_command("qadd <+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow")
       expect(replies.last).to match(/Added quote #\d+/)
     end
