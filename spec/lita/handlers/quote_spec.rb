@@ -50,13 +50,27 @@ describe Lita::Handlers::Quote, lita_handler: true do
   end
 
   describe "#get_quote" do
-    it "reports no quotes were found" do
-      send_command("qget")
-      expect(replies.last).to match("No quote found")
+    context "unpopulated quote list" do
+      it "reports no quotes were found" do
+        send_command("qget")
+        expect(replies.last).to match("No quote found")
+      end
+      it "reports given quote not found" do
+        send_command("qget 1")
+        expect(replies.last).to match("No quote found")
+      end
     end
-    it "reports given quote not found" do
-      send_command("qget 1")
-      expect(replies.last).to match("No quote found")
+    context "populated quote list" do
+      before :each do
+        Lita.redis.hset("handlers:quote:list", 1, "one")
+        Lita.redis.hset("handlers:quote:list", 2, "two")
+        Lita.redis.hset("handlers:quote:list", 3, "three")
+        Lita.redis.hset("handlers:quote:list", 4, "four")
+      end
+      it "reports specified quote" do
+        send_command("qget 2")
+        expect(replies.last).to match("two")
+      end
     end
   end
 
