@@ -79,9 +79,31 @@ describe Lita::Handlers::Quote, lita_handler: true do
     before do
       robot.auth.add_user_to_group!(user, :quote_admins)
     end
-    it "reports given quote not found" do
-      send_command("qdel 1", as: user)
-      expect(replies.last).to match("Quote #1 does not exist")
+    context "unpopulated quotes list" do
+      it "reports given quote not found" do
+        send_command("qdel 1", as: user)
+        expect(replies.last).to match("Quote #1 does not exist")
+      end
+    end
+    context "populated quote list" do
+      before :each do
+        Lita.redis.hset("handlers:quote:list", 1, "one")
+        Lita.redis.hset("handlers:quote:list", 2, "two")
+        Lita.redis.hset("handlers:quote:list", 3, "three")
+        Lita.redis.hset("handlers:quote:list", 4, "four")
+      end
+      it "reports given quote not found" do
+        send_command("qdel 5", as: user)
+        expect(replies.last).to match("Quote #5 does not exist")
+      end
+      it "deletes quote from list" do
+        send_command("qdel 3", as: user)
+        expect(Lita.redis.hget("handlers:quote:list", 3)).to eq(nil)
+      end
+      it "reports quote was deleted" do
+        send_command("qdel 3", as: user)
+        expect(replies.last).to match("Deleted quote #3")
+      end
     end
   end
 end
