@@ -61,5 +61,13 @@ describe Lita::Handlers::Quote, lita_handler: true do
   end
 
   describe "#del_quote" do
+    let (:user) { Lita::User.create(1, name: "authed_user") }  
+    before do
+      robot.auth.add_user_to_group!(user, :quote_admins)
+    end
+    it "reports given quote not found" do
+      send_command("qdel 1", as: user)
+      expect(replies.last).to match("Quote #1 does not exist")
+    end
   end
 end
