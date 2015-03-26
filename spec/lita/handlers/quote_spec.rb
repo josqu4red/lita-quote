@@ -33,8 +33,18 @@ describe Lita::Handlers::Quote, lita_handler: true do
   it { is_expected.not_to route_command("yo delquote dat").to(:del_quote) }
 
   describe "#add_quote" do
+    let (:message) { "<+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow" }
+    it "adds quote to database" do
+      send_command("qadd #{message}")
+      expect(Lita.redis.hget("handlers:quote:list", 1)).to match(/^#1: #{Regexp.escape(message)} \d{8}-\d{4}$/)
+    end
+    it "adds quote in right position" do
+      send_command("qadd #{message}")
+      send_command("qadd next message")
+      expect(Lita.redis.hget("handlers:quote:list", 2)).to match(/^#2: next message \d{8}-\d{4}$/)
+    end
     it "reports it added a quote" do
-      send_command("qadd <+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow")
+      send_command("qadd #{message}")
       expect(replies.last).to match(/Added quote #\d+/)
     end
   end
