@@ -50,6 +50,14 @@ describe Lita::Handlers::Quote, lita_handler: true do
   end
 
   describe "#get_quote" do
+    it "reports no quotes were found" do
+      send_command("qget")
+      expect(replies.last).to match("No quote found")
+    end
+    it "reports given quote not found" do
+      send_command("qget 1")
+      expect(replies.last).to match("No quote found")
+    end
   end
 
   describe "#del_quote" do
