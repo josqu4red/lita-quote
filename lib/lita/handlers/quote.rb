@@ -18,11 +18,11 @@ module Lita
         response.reply("Added quote ##{quote_id}")
       end
 
-      route /^qget(\s*(\d+))?$/, :get_quote, command: true,
-        help: { "qget [id]" => "Retrieve a quote by #id or randomly" }
+      route /^qget(\s*((\d+)|(\S.*)))?$/, :get_quote, command: true,
+        help: { "qget [id|string]" => "Retrieve a quote by #id or randomly (optionally matching against a string)" }
 
-      route /^getquote(\s*(\d+))?$/, :get_quote, command: true,
-        help: { "getquote [id]" => "Retrieve a quote by #id or randomly" }
+      route /^getquote(\s*((\d+)|(\S.*)))?$/, :get_quote, command: true,
+        help: { "getquote [id|string]" => "Retrieve a quote by #id or randomly (optionally matching against a string)" }
 
       def get_quote(response)
         if quote_id = response.matches.flatten.last

@@ -20,10 +20,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
   it { is_expected.to route_command("getquote").to(:get_quote) }
   it { is_expected.to route_command("qget 22").to(:get_quote) }
   it { is_expected.to route_command("getquote 22").to(:get_quote) }
+  it { is_expected.to route_command("qget dat").to(:get_quote) }
+  it { is_expected.to route_command("getquote dat").to(:get_quote) }
   it { is_expected.not_to route_command("yo qget").to(:get_quote) }
   it { is_expected.not_to route_command("yo getquote").to(:get_quote) }
-  it { is_expected.not_to route_command("qget dat").to(:get_quote) }
-  it { is_expected.not_to route_command("getquote dat").to(:get_quote) }
 
   it { is_expected.to route_command("qdel 22").with_authorization_for(:quote_admins).to(:del_quote) }
   it { is_expected.to route_command("delquote 22").with_authorization_for(:quote_admins).to(:del_quote) }
