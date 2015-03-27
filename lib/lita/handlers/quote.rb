@@ -18,10 +18,10 @@ module Lita
         response.reply("Added quote ##{quote_id}")
       end
 
-      route /^qget(\s*((\d+)|(\S.*)))?$/, :get_quote, command: true,
+      route /^qget(?:\s*((?:\d+)|(?:\S.*)))?$/, :get_quote, command: true,
         help: { "qget [id|string]" => "Retrieve a quote by #id or randomly (optionally matching against a string)" }
 
-      route /^getquote(\s*((\d+)|(\S.*)))?$/, :get_quote, command: true,
+      route /^getquote(?:\s*((?:\d+)|(?:\S.*)))?$/, :get_quote, command: true,
         help: { "getquote [id|string]" => "Retrieve a quote by #id or randomly (optionally matching against a string)" }
 
       def get_quote(response)
