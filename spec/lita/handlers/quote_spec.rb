@@ -36,12 +36,12 @@ describe Lita::Handlers::Quote, lita_handler: true do
     let (:message) { "<+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow" }
     it "adds quote to database" do
       send_command("qadd #{message}")
-      expect(Lita.redis.hget("handlers:quote:list", 1)).to match(/^#1: #{Regexp.escape(message)} \d{8}-\d{4}$/)
+      expect(Lita.redis.hget("handlers:quote:quotes", 1)).to match(/^#1: #{Regexp.escape(message)} \d{8}-\d{4}$/)
     end
     it "adds quote in right position" do
       send_command("qadd #{message}")
       send_command("qadd next message")
-      expect(Lita.redis.hget("handlers:quote:list", 2)).to match(/^#2: next message \d{8}-\d{4}$/)
+      expect(Lita.redis.hget("handlers:quote:quotes", 2)).to match(/^#2: next message \d{8}-\d{4}$/)
     end
     it "reports it added a quote" do
       send_command("qadd #{message}")
@@ -66,10 +66,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
     context "populated quote list" do
       before :each do
-        Lita.redis.hset("handlers:quote:list", 1, "one")
-        Lita.redis.hset("handlers:quote:list", 2, "two")
-        Lita.redis.hset("handlers:quote:list", 3, "three")
-        Lita.redis.hset("handlers:quote:list", 4, "four")
+        Lita.redis.hset("handlers:quote:quotes", 1, "one")
+        Lita.redis.hset("handlers:quote:quotes", 2, "two")
+        Lita.redis.hset("handlers:quote:quotes", 3, "three")
+        Lita.redis.hset("handlers:quote:quotes", 4, "four")
       end
       it "reports specified quote" do
         send_command("qget 2")
@@ -91,10 +91,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
     context "populated quote list" do
       before :each do
-        Lita.redis.hset("handlers:quote:list", 1, "one")
-        Lita.redis.hset("handlers:quote:list", 2, "two")
-        Lita.redis.hset("handlers:quote:list", 3, "three")
-        Lita.redis.hset("handlers:quote:list", 4, "four")
+        Lita.redis.hset("handlers:quote:quotes", 1, "one")
+        Lita.redis.hset("handlers:quote:quotes", 2, "two")
+        Lita.redis.hset("handlers:quote:quotes", 3, "three")
+        Lita.redis.hset("handlers:quote:quotes", 4, "four")
       end
       it "reports given quote not found" do
         send_command("qdel 5", as: user)
@@ -102,7 +102,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
       end
       it "deletes quote from list" do
         send_command("qdel 3", as: user)
-        expect(Lita.redis.hget("handlers:quote:list", 3)).to eq(nil)
+        expect(Lita.redis.hget("handlers:quote:quotes", 3)).to eq(nil)
       end
       it "reports quote was deleted" do
         send_command("qdel 3", as: user)

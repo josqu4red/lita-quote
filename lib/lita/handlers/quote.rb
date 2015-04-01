@@ -16,7 +16,7 @@ module Lita
         
         quote_message = "##{quote_id}: #{message}"
         quote_message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
-        redis.hset("list", quote_id, quote_message)
+        redis.hset("quotes", quote_id, quote_message)
 
         message.split.uniq.each do |word|
           redis.sadd("words:#{word}", quote_id)
@@ -33,9 +33,9 @@ module Lita
 
       def get_quote(response)
         if quote_id = response.matches.flatten.last
-          quote = redis.hget("list", quote_id.to_i)
+          quote = redis.hget("quotes", quote_id.to_i)
         else
-          quotes = redis.hvals("list")
+          quotes = redis.hvals("quotes")
           quote = quotes.sample
         end
 
@@ -54,7 +54,7 @@ module Lita
 
       def del_quote(response)
         quote_id = response.matches.flatten.last.to_i
-        if redis.hdel("list", quote_id) == 1
+        if redis.hdel("quotes", quote_id) == 1
           response.reply("Deleted quote ##{quote_id}")
         else
           response.reply("Quote ##{quote_id} does not exist")
