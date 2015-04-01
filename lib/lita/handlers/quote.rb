@@ -17,6 +17,10 @@ module Lita
         quote_message = "##{quote_id}: #{message}"
         quote_message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
         redis.hset("list", quote_id, quote_message)
+
+        message.split.uniq.each do |word|
+          redis.sadd("words:#{word}", quote_id)
+        end
         
         response.reply("Added quote ##{quote_id}")
       end
