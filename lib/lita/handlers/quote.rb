@@ -11,10 +11,13 @@ module Lita
         help: { "addquote <text>" => "Store quote following the command" }
 
       def add_quote(response)
+        message = response.matches.flatten.first
         quote_id = redis.incr("last_id")
-        message = "##{quote_id}: #{response.matches.flatten.first}"
-        message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
-        redis.hset("list", quote_id, message)
+        
+        quote_message = "##{quote_id}: #{message}"
+        quote_message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
+        redis.hset("list", quote_id, quote_message)
+        
         response.reply("Added quote ##{quote_id}")
       end
 
