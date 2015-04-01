@@ -62,6 +62,8 @@ describe Lita::Handlers::Quote, lita_handler: true do
       it "reports given quote not found" do
         send_command("qget 1")
         expect(replies.last).to match("No quote found")
+        send_command("qget two")
+        expect(replies.last).to match("No quote found")
       end
     end
     context "populated quote list" do
