@@ -49,7 +49,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
     it "adds quote to search index" do
       send_command("qadd #{message}")
-      expect(Lita.redis.smembers("handlers:quote:words:d'accès")).to include("1")
+      expect(Lita.redis.smembers("handlers:quote:words:RNXP")).to include("1")
     end
   end
 

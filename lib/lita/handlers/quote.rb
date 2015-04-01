@@ -1,3 +1,4 @@
+require 'text'
 module Lita
   module Handlers
     class Quote < Handler
@@ -19,7 +20,7 @@ module Lita
         redis.hset("quotes", quote_id, quote_message)
 
         message.split.uniq.each do |word|
-          redis.sadd("words:#{word}", quote_id)
+          redis.sadd("words:#{Text::Metaphone.metaphone(word)}", quote_id)
         end
         
         response.reply("Added quote ##{quote_id}")
