@@ -63,7 +63,11 @@ module Lita
 
       def del_quote(response)
         quote_id = response.matches.flatten.last.to_i
+        quote = redis.hget("quotes", quote_id.to_i) 
         if redis.hdel("quotes", quote_id) == 1
+          quote.split.uniq.each do |word|
+            redis.srem("words:#{Text::Metaphone.metaphone(word)}", quote_id.to_i)
+          end
           response.reply("Deleted quote ##{quote_id}")
         else
           response.reply("Quote ##{quote_id} does not exist")

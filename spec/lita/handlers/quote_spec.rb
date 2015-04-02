@@ -108,9 +108,19 @@ describe Lita::Handlers::Quote, lita_handler: true do
     context "populated quote list" do
       before :each do
         Lita.redis.hset("handlers:quote:quotes", 1, "one")
-        Lita.redis.hset("handlers:quote:quotes", 2, "two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "three")
-        Lita.redis.hset("handlers:quote:quotes", 4, "four")
+        Lita.redis.hset("handlers:quote:quotes", 2, "one two")
+        Lita.redis.hset("handlers:quote:quotes", 3, "one two three")
+        Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
+        Lita.redis.sadd("handlers:quote:words:ON", 1)
+        Lita.redis.sadd("handlers:quote:words:ON", 2)
+        Lita.redis.sadd("handlers:quote:words:ON", 3)
+        Lita.redis.sadd("handlers:quote:words:ON", 4)
+        Lita.redis.sadd("handlers:quote:words:TW", 2)
+        Lita.redis.sadd("handlers:quote:words:TW", 3)
+        Lita.redis.sadd("handlers:quote:words:TW", 4)
+        Lita.redis.sadd("handlers:quote:words:0R", 3)
+        Lita.redis.sadd("handlers:quote:words:0R", 4)
+        Lita.redis.sadd("handlers:quote:words:FR", 4)
       end
       it "reports given quote not found" do
         send_command("qdel 5", as: user)
@@ -119,6 +129,12 @@ describe Lita::Handlers::Quote, lita_handler: true do
       it "deletes quote from list" do
         send_command("qdel 3", as: user)
         expect(Lita.redis.hget("handlers:quote:quotes", 3)).to eq(nil)
+      end
+      it "removes quote from search word sets" do
+        send_command("qdel 3", as: user)
+        expect(Lita.redis.sismember("handlers:quote:words:ON", 3)).to eq(false)
+        expect(Lita.redis.sismember("handlers:quote:words:TW", 3)).to eq(false)
+        expect(Lita.redis.sismember("handlers:quote:words:0R", 3)).to eq(false)
       end
       it "reports quote was deleted" do
         send_command("qdel 3", as: user)
