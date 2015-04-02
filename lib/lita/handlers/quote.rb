@@ -33,13 +33,21 @@ module Lita
         help: { "getquote [id|string]" => "Retrieve a quote by #id or randomly (optionally matching against a string)" }
 
       def get_quote(response)
-        if quote_id = response.matches.flatten.last
-          quote = redis.hget("quotes", quote_id.to_i)
+        search_key = response.matches.flatten.last
+        if search_key
+          if search_key.match(/\d+/)
+            quote = redis.hget("quotes", search_key.to_i)
+          else
+            metaphone_keys = search_key.split.uniq.map do |word|
+              "words:#{Text::Metaphone.metaphone(word)}"                                            
+            end
+            matching_ids = redis.sinter(metaphone_keys)
+            quote = redis.hget("quotes", matching_ids.sample.to_i)
+          end
         else
           quotes = redis.hvals("quotes")
           quote = quotes.sample
         end
-
         if quote
           response.reply(quote)
         else

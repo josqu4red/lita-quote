@@ -69,13 +69,27 @@ describe Lita::Handlers::Quote, lita_handler: true do
     context "populated quote list" do
       before :each do
         Lita.redis.hset("handlers:quote:quotes", 1, "one")
-        Lita.redis.hset("handlers:quote:quotes", 2, "two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "three")
-        Lita.redis.hset("handlers:quote:quotes", 4, "four")
+        Lita.redis.hset("handlers:quote:quotes", 2, "one two")
+        Lita.redis.hset("handlers:quote:quotes", 3, "one two three")
+        Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
+        Lita.redis.sadd("handlers:quote:words:ON", 1)
+        Lita.redis.sadd("handlers:quote:words:ON", 2)
+        Lita.redis.sadd("handlers:quote:words:ON", 3)
+        Lita.redis.sadd("handlers:quote:words:ON", 4)
+        Lita.redis.sadd("handlers:quote:words:TW", 2)
+        Lita.redis.sadd("handlers:quote:words:TW", 3)
+        Lita.redis.sadd("handlers:quote:words:TW", 4)
+        Lita.redis.sadd("handlers:quote:words:0R", 3)
+        Lita.redis.sadd("handlers:quote:words:0R", 4)
+        Lita.redis.sadd("handlers:quote:words:FR", 4)
       end
       it "reports specified quote" do
         send_command("qget 2")
-        expect(replies.last).to match("two")
+        expect(replies.last).to match("one two")
+      end
+      it "reports a quote containing quote string" do
+        send_command("qget two")
+        expect(replies.last).to include("two")
       end
     end
   end
