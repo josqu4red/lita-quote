@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/josqu4red/lita-quote.png?branch=master)](https://travis-ci.org/josqu4red/lita-quote)
 [![Coverage Status](https://coveralls.io/repos/josqu4red/lita-quote/badge.png)](https://coveralls.io/r/josqu4red/lita-quote)
 
-[**lita-quote*](https://github.com/josqu4red/lita-quote) is a handler for [Lita](https://github.com/jimmycuadra/lita) to store and retrieve user quotes. The **fork** of lita-quote found here supports retrieving quotes by content, but is not ready for normal use. 
+[**lita-quote**](https://github.com/josqu4red/lita-quote) is a handler for [Lita](https://github.com/jimmycuadra/lita) to store and retrieve user quotes. The **fork** of lita-quote found here supports retrieving quotes by content, but is not ready for normal use. 
 
 ## Compatibility with existing lita-quote installs
 This is not a drop in replacement for mainline lita-quote. The redis data structure has changed, and at the moment there is no utility to update existing data to the new structure. 
