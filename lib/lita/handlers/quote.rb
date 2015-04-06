@@ -4,6 +4,7 @@ module Lita
     class Quote < Handler
 
       config :date_format
+      config :metaphone_exclusions
 
       route /^qadd\s+(.*)$/, :add_quote, command: true,
         help: { "qadd <text>" => "Store quote following the command" }
@@ -20,7 +21,13 @@ module Lita
         redis.hset("quotes", quote_id, quote_message)
 
         message.split.uniq.each do |word|
-          redis.sadd("words:#{Text::Metaphone.metaphone(word)}", quote_id)
+          if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
+              regex.match(word)
+            end
+            redis.sadd("words:#{word}", quote_id)
+            else
+            redis.sadd("words:#{Text::Metaphone.metaphone(word)}", quote_id)
+          end
         end
         
         response.reply("Added quote ##{quote_id}")

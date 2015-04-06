@@ -6,6 +6,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
   before do
     Lita.configure do |config|
       config.handlers.quote.date_format = "%Y%m%d-%H%M"
+      config.handlers.quote.metaphone_exclusions = [/<@[A-Z0-9]+>/]
     end
   end
 
@@ -50,6 +51,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
     it "adds quote to search index" do
       send_command("qadd #{message}")
       expect(Lita.redis.smembers("handlers:quote:words:RNXP")).to include("1")
+    end
+    it "respects metaphone_exclusion configuration" do
+      send_command("qadd this last word is excluded <@U041CBXPN>")
+      expect(Lita.redis.sismember("handlers:quote:words:<@U041CBXPN>", 1)).to equal(true)
     end
   end
 
