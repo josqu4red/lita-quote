@@ -73,21 +73,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
     context "populated quote list" do
       before :each do
-        Lita.redis.hset("handlers:quote:quotes", 1, "one")
-        Lita.redis.hset("handlers:quote:quotes", 2, "one two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
-        Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
-        Lita.redis.sadd("handlers:quote:words:ON", 1)
-        Lita.redis.sadd("handlers:quote:words:ON", 2)
-        Lita.redis.sadd("handlers:quote:words:ON", 3)
-        Lita.redis.sadd("handlers:quote:words:ON", 4)
-        Lita.redis.sadd("handlers:quote:words:TW", 2)
-        Lita.redis.sadd("handlers:quote:words:TW", 3)
-        Lita.redis.sadd("handlers:quote:words:TW", 4)
-        Lita.redis.sadd("handlers:quote:words:0R", 3)
-        Lita.redis.sadd("handlers:quote:words:0R", 4)
-        Lita.redis.sadd("handlers:quote:words:FR", 4)
-        Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
+        populate_redis
       end
       it "reports specified quote" do
         send_command("qget 2")
@@ -117,21 +103,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
     context "populated quote list" do
       before :each do
-        Lita.redis.hset("handlers:quote:quotes", 1, "one")
-        Lita.redis.hset("handlers:quote:quotes", 2, "one two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
-        Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
-        Lita.redis.sadd("handlers:quote:words:ON", 1)
-        Lita.redis.sadd("handlers:quote:words:ON", 2)
-        Lita.redis.sadd("handlers:quote:words:ON", 3)
-        Lita.redis.sadd("handlers:quote:words:ON", 4)
-        Lita.redis.sadd("handlers:quote:words:TW", 2)
-        Lita.redis.sadd("handlers:quote:words:TW", 3)
-        Lita.redis.sadd("handlers:quote:words:TW", 4)
-        Lita.redis.sadd("handlers:quote:words:0R", 3)
-        Lita.redis.sadd("handlers:quote:words:0R", 4)
-        Lita.redis.sadd("handlers:quote:words:FR", 4)
-        Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
+        populate_redis
       end
       it "reports given quote not found" do
         send_command("qdel 5", as: user)
@@ -155,3 +127,22 @@ describe Lita::Handlers::Quote, lita_handler: true do
     end
   end
 end
+
+def populate_redis
+  Lita.redis.hset("handlers:quote:quotes", 1, "one")
+  Lita.redis.hset("handlers:quote:quotes", 2, "one two")
+  Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
+  Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
+  Lita.redis.sadd("handlers:quote:words:ON", 1)
+  Lita.redis.sadd("handlers:quote:words:ON", 2)
+  Lita.redis.sadd("handlers:quote:words:ON", 3)
+  Lita.redis.sadd("handlers:quote:words:ON", 4)
+  Lita.redis.sadd("handlers:quote:words:TW", 2)
+  Lita.redis.sadd("handlers:quote:words:TW", 3)
+  Lita.redis.sadd("handlers:quote:words:TW", 4)
+  Lita.redis.sadd("handlers:quote:words:0R", 3)
+  Lita.redis.sadd("handlers:quote:words:0R", 4)
+  Lita.redis.sadd("handlers:quote:words:FR", 4)
+  Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
+end
+
