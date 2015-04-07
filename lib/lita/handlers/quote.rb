@@ -42,11 +42,17 @@ module Lita
       def get_quote(response)
         search_key = response.matches.flatten.last
         if search_key
-          if search_key.match(/\d+/)
+          if search_key.match(/^\d+$/)
             quote = redis.hget("quotes", search_key.to_i)
           else
             metaphone_keys = search_key.split.uniq.map do |word|
-              "words:#{Text::Metaphone.metaphone(word)}"                                            
+              if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
+                  regex.match(word)
+                end
+                "words:#{word}"
+                else
+                "words:#{Text::Metaphone.metaphone(word)}"                                            
+              end
             end
             matching_ids = redis.sinter(metaphone_keys)
             quote = redis.hget("quotes", matching_ids.sample.to_i)
@@ -73,7 +79,13 @@ module Lita
         quote = redis.hget("quotes", quote_id.to_i) 
         if redis.hdel("quotes", quote_id) == 1
           quote.split.uniq.each do |word|
-            redis.srem("words:#{Text::Metaphone.metaphone(word)}", quote_id.to_i)
+              if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
+                  regex.match(word)
+                end
+                redis.srem("words:#{word}", quote_id.to_i)
+                else
+                redis.srem("words:#{Text::Metaphone.metaphone(word)}", quote_id.to_i)
+              end
           end
           response.reply("Deleted quote ##{quote_id}")
         else

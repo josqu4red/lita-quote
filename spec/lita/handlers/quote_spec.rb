@@ -75,7 +75,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
       before :each do
         Lita.redis.hset("handlers:quote:quotes", 1, "one")
         Lita.redis.hset("handlers:quote:quotes", 2, "one two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "one two three")
+        Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
         Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
         Lita.redis.sadd("handlers:quote:words:ON", 1)
         Lita.redis.sadd("handlers:quote:words:ON", 2)
@@ -87,6 +87,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
         Lita.redis.sadd("handlers:quote:words:0R", 3)
         Lita.redis.sadd("handlers:quote:words:0R", 4)
         Lita.redis.sadd("handlers:quote:words:FR", 4)
+        Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
       end
       it "reports specified quote" do
         send_command("qget 2")
@@ -95,6 +96,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
       it "reports a quote containing quote string" do
         send_command("qget two")
         expect(replies.last).to include("two")
+      end
+      it "respects metaphone exclusion configuration" do
+        send_command("qget <@U048ATR5C>")
+        expect(replies.last).to include("<@U048ATR5C>")
       end
     end
   end
@@ -114,7 +119,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
       before :each do
         Lita.redis.hset("handlers:quote:quotes", 1, "one")
         Lita.redis.hset("handlers:quote:quotes", 2, "one two")
-        Lita.redis.hset("handlers:quote:quotes", 3, "one two three")
+        Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
         Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
         Lita.redis.sadd("handlers:quote:words:ON", 1)
         Lita.redis.sadd("handlers:quote:words:ON", 2)
@@ -126,6 +131,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
         Lita.redis.sadd("handlers:quote:words:0R", 3)
         Lita.redis.sadd("handlers:quote:words:0R", 4)
         Lita.redis.sadd("handlers:quote:words:FR", 4)
+        Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
       end
       it "reports given quote not found" do
         send_command("qdel 5", as: user)
@@ -140,6 +146,7 @@ describe Lita::Handlers::Quote, lita_handler: true do
         expect(Lita.redis.sismember("handlers:quote:words:ON", 3)).to eq(false)
         expect(Lita.redis.sismember("handlers:quote:words:TW", 3)).to eq(false)
         expect(Lita.redis.sismember("handlers:quote:words:0R", 3)).to eq(false)
+        expect(Lita.redis.sismember("handlers:quote:words:<@U048ATR5C>", 3)).to eq(false)
       end
       it "reports quote was deleted" do
         send_command("qdel 3", as: user)
