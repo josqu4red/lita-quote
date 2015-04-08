@@ -19,17 +19,7 @@ module Lita
         quote_message = "##{quote_id}: #{message}"
         quote_message += " #{Time.now.strftime(config.date_format)}" if Lita.config.handlers.quote.date_format
         redis.hset("quotes", quote_id, quote_message)
-
-        message.split.uniq.each do |word|
-          if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
-              regex.match(word)
-            end
-            redis.sadd("words:#{word}", quote_id)
-            else
-            redis.sadd("words:#{Text::Metaphone.metaphone(word)}", quote_id)
-          end
-        end
-        
+        index_quote(message, quote_id)
         response.reply("Added quote ##{quote_id}")
       end
 
@@ -41,31 +31,18 @@ module Lita
 
       def get_quote(response)
         search_key = response.matches.flatten.last
-        if search_key
-          if search_key.match(/^\d+$/)
-            quote = redis.hget("quotes", search_key.to_i)
-          else
-            metaphone_keys = search_key.split.uniq.map do |word|
-              if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
-                  regex.match(word)
-                end
-                "words:#{word}"
-                else
-                "words:#{Text::Metaphone.metaphone(word)}"                                            
-              end
-            end
-            matching_ids = redis.sinter(metaphone_keys)
-            quote = redis.hget("quotes", matching_ids.sample.to_i)
-          end
+        case search_key
+        when /^\d+$/
+          quote = redis.hget("quotes", search_key.to_i)
+        when /^.+$/
+          metaphone_keys = map_to_index(search_key)
+          matching_ids = redis.sinter(metaphone_keys)
+          quote = redis.hget("quotes", matching_ids.sample.to_i)
         else
           quotes = redis.hvals("quotes")
           quote = quotes.sample
         end
-        if quote
-          response.reply(quote)
-        else
-          response.reply("No quote found")
-        end
+        response.reply( quote ? quote : "No quote found")
       end
 
       route /^qdel\s+(\d+)$/, :del_quote, command: true, restrict_to: ["quote_admins"],
@@ -78,19 +55,25 @@ module Lita
         quote_id = response.matches.flatten.last.to_i
         quote = redis.hget("quotes", quote_id.to_i) 
         if redis.hdel("quotes", quote_id) == 1
-          quote.split.uniq.each do |word|
-              if Lita.config.handlers.quote.metaphone_exclusions.any? do |regex|
-                  regex.match(word)
-                end
-                redis.srem("words:#{word}", quote_id.to_i)
-                else
-                redis.srem("words:#{Text::Metaphone.metaphone(word)}", quote_id.to_i)
-              end
-          end
+          map_to_index(quote).each { |i| redis.srem(i, quote_id.to_i) }
           response.reply("Deleted quote ##{quote_id}")
         else
           response.reply("Quote ##{quote_id} does not exist")
         end
+      end
+    
+      def map_to_index(str)
+        str.split.uniq.map do |word|
+          if Lita.config.handlers.quote.metaphone_exclusions.any? { |regex| regex.match(word) }
+            "words:#{word}"
+          else
+            "words:#{Text::Metaphone.metaphone(word)}"                                            
+          end
+        end
+      end
+      
+      def index_quote(str, id)
+        map_to_index(str).each { |word| redis.sadd(word, id) }
       end
     end
 
