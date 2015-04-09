@@ -62,6 +62,15 @@ module Lita
         end
       end
     
+      route /^reindex$/, :rebuild_index, command:true, restrict_to: ["quote_admins"],
+        help: { "reindex" => "Delete and rebuild the quote search index" }
+  
+      def rebuild_index(response)
+        redis.keys("words:*").each { |k| redis.del(k) }
+        last_quote = redis.get("last_id").to_i
+        (1..last_quote).each { |id| index_quote(redis.hget("quotes", id), id) }
+      end
+    
       def map_to_index(str)
         str.split.uniq.map do |word|
           if Lita.config.handlers.quote.metaphone_exclusions.any? { |regex| regex.match(word) }

@@ -33,6 +33,10 @@ describe Lita::Handlers::Quote, lita_handler: true do
   it { is_expected.not_to route_command("yo qdel dat").to(:del_quote) }
   it { is_expected.not_to route_command("yo delquote dat").to(:del_quote) }
 
+  it { is_expected.to route_command("reindex").with_authorization_for(:quote_admins).to(:rebuild_index) }
+  it { is_expected.not_to route_command("reindex 22").to(:rebuild_index) }
+  it { is_expected.not_to route_command("yo reindex dat").to(:rebuild_index) }
+
   describe "#add_quote" do
     let (:message) { "<+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow" }
     it "adds quote to database" do
@@ -126,13 +130,40 @@ describe Lita::Handlers::Quote, lita_handler: true do
       end
     end
   end
+  
+  describe "#rebuild_index" do
+    let (:user) { Lita::User.create(1, name: "authed_user") }  
+    before do
+      robot.auth.add_user_to_group!(user, :quote_admins)
+    end
+    before :each do
+      populate_quotes
+    end
+    it "adds quote to search index" do
+      send_command("reindex", as: user)
+      expect(Lita.redis.smembers("handlers:quote:words:TW")).to include("4")
+    end
+    it "respects metaphone_exclusion configuration" do
+      send_command("reindex", as: user)
+      expect(Lita.redis.sismember("handlers:quote:words:<@U048ATR5C>", 3)).to equal(true)
+    end
+    it "overwrites existing index" do
+      Lita.redis.sadd("handlers:quote:words:BeforeReindex", 42)
+      send_command("reindex", as: user)
+      expect(Lita.redis.exists("handlers:quote:words:BeforeReindex")).to equal(false)
+    end
+  end
 end
 
-def populate_redis
+def populate_quotes
   Lita.redis.hset("handlers:quote:quotes", 1, "one")
   Lita.redis.hset("handlers:quote:quotes", 2, "one two")
   Lita.redis.hset("handlers:quote:quotes", 3, "one two three <@U048ATR5C>")
   Lita.redis.hset("handlers:quote:quotes", 4, "one two three four")
+  Lita.redis.set("handlers:quote:last_id", 4)
+end
+def populate_redis
+  populate_quotes
   Lita.redis.sadd("handlers:quote:words:ON", 1)
   Lita.redis.sadd("handlers:quote:words:ON", 2)
   Lita.redis.sadd("handlers:quote:words:ON", 3)
@@ -145,4 +176,3 @@ def populate_redis
   Lita.redis.sadd("handlers:quote:words:FR", 4)
   Lita.redis.sadd("handlers:quote:words:<@U048ATR5C>", 3)
 end
-
