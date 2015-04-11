@@ -33,9 +33,12 @@ describe Lita::Handlers::Quote, lita_handler: true do
   it { is_expected.not_to route_command("yo qdel dat").to(:del_quote) }
   it { is_expected.not_to route_command("yo delquote dat").to(:del_quote) }
 
-  it { is_expected.to route_command("reindex").with_authorization_for(:quote_admins).to(:rebuild_index) }
-  it { is_expected.not_to route_command("reindex 22").to(:rebuild_index) }
-  it { is_expected.not_to route_command("yo reindex dat").to(:rebuild_index) }
+  it { is_expected.to route_command("qindex").with_authorization_for(:quote_admins).to(:rebuild_index) }
+  it { is_expected.to route_command("indexquotes").with_authorization_for(:quote_admins).to(:rebuild_index) }
+  it { is_expected.not_to route_command("qindex 22").to(:rebuild_index) }
+  it { is_expected.not_to route_command("indexquotes 22").to(:rebuild_index) }
+  it { is_expected.not_to route_command("yo qindex dat").to(:rebuild_index) }
+  it { is_expected.not_to route_command("yo indexquotes dat").to(:rebuild_index) }
 
   describe "#add_quote" do
     let (:message) { "<+renchap> t'as un user et pas d'accès ? <+josqu4red> nan mais allow" }
@@ -140,16 +143,16 @@ describe Lita::Handlers::Quote, lita_handler: true do
       populate_quotes
     end
     it "adds quote to search index" do
-      send_command("reindex", as: user)
+      send_command("qindex", as: user)
       expect(Lita.redis.smembers("handlers:quote:words:TW")).to include("4")
     end
     it "respects metaphone_exclusion configuration" do
-      send_command("reindex", as: user)
+      send_command("qindex", as: user)
       expect(Lita.redis.sismember("handlers:quote:words:<@U048ATR5C>", 3)).to equal(true)
     end
     it "overwrites existing index" do
       Lita.redis.sadd("handlers:quote:words:BeforeReindex", 42)
-      send_command("reindex", as: user)
+      send_command("qindex", as: user)
       expect(Lita.redis.exists("handlers:quote:words:BeforeReindex")).to equal(false)
     end
   end

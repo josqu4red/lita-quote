@@ -61,14 +61,18 @@ module Lita
           response.reply("Quote ##{quote_id} does not exist")
         end
       end
-    
-      route /^reindex$/, :rebuild_index, command:true, restrict_to: ["quote_admins"],
-        help: { "reindex" => "Delete and rebuild the quote search index" }
+      route /^qindex$/, :rebuild_index, command:true, restrict_to: ["quote_admins"],
+        help: { "qindex" => "Delete and rebuild the quote search index" }
+
+
+      route /^indexquotes$/, :rebuild_index, command:true, restrict_to: ["quote_admins"],
+        help: { "indexquotes" => "Delete and rebuild the quote search index" }
   
       def rebuild_index(response)
         redis.keys("words:*").each { |k| redis.del(k) }
         last_quote = redis.get("last_id").to_i
         (1..last_quote).each { |id| index_quote(redis.hget("quotes", id), id) }
+        response.reply("Rebuilt the search index.")
       end
     
       def map_to_index(str)
